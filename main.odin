@@ -1,4 +1,4 @@
-package main
+package game
 
 import rl "vendor:raylib"
 
@@ -17,6 +17,7 @@ main :: proc() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Kindler")
 
 	target: rl.RenderTexture2D = rl.LoadRenderTexture(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT)
+	player := Entity{{0, 0}, rl.LoadTexture("textures/player.png")}
 
 	source_rec: rl.Rectangle = {
 		f32(0),
@@ -35,20 +36,25 @@ main :: proc() {
 	origin: rl.Vector2 = {f32(0), f32(0)}
 
 	for !rl.WindowShouldClose() {
-
+		// Player controls
 		if rl.IsKeyPressed(.LEFT) {
-			player_pos.x -= 1
+			player.position.x -= 1
 		} else if rl.IsKeyPressed(.RIGHT) {
-			player_pos.x += 1
+			player.position.x += 1
 		} else if rl.IsKeyPressed(.UP) {
-			player_pos.y -= 1
+			player.position.y -= 1
 		} else if rl.IsKeyPressed(.DOWN) {
-			player_pos.y += 1
+			player.position.y += 1
 		}
 
 		rl.BeginTextureMode(target)
+		// Draw Player
+		rl.DrawTextureV(
+			player.sprite,
+			{player.position.x * f32(TILE), player.position.y * f32(TILE)},
+			rl.WHITE,
+		)
 		rl.ClearBackground(rl.DARKBROWN)
-		rl.DrawRectangleV({player_pos.x * f32(TILE), player_pos.y * f32(TILE)}, {16, 16}, rl.WHITE)
 		rl.EndTextureMode()
 
 		rl.BeginDrawing()
