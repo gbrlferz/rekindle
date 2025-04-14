@@ -15,6 +15,7 @@ player_pos := rl.Vector2{0, 0}
 
 main :: proc() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Kindler")
+	defer rl.CloseWindow()
 
 	target: rl.RenderTexture2D = rl.LoadRenderTexture(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT)
 	player := Entity{{0, 0}, rl.LoadTexture("textures/player.png")}
@@ -63,6 +64,4 @@ main :: proc() {
 
 		rl.EndDrawing()
 	}
-
-	rl.CloseWindow()
 }
