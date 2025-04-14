@@ -2,20 +2,23 @@ package game
 
 import rl "vendor:raylib"
 
-TILE: int : 16
+TILE_SIZE: i32 : 16
 
 SCREEN_WIDTH: i32 : 1280
 SCREEN_HEIGHT: i32 : 720
 
 VIRTUAL_SCREEN_WIDTH: i32 : 320
 VIRTUAL_SCREEN_HEIGHT: i32 : 180
-VIRTUAL_RATIO: f32 = f32(SCREEN_WIDTH / SCREEN_HEIGHT)
+VIRTUAL_RATIO: f32 : f32(SCREEN_WIDTH / SCREEN_HEIGHT)
 
-player_pos := rl.Vector2{0, 0}
+GRID_WIDTH: i32 : 10
+GRID_HEIGHT: i32 : 10
 
 main :: proc() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Kindler")
 	defer rl.CloseWindow()
+
+	grid: [GRID_WIDTH][GRID_HEIGHT]i32
 
 	target: rl.RenderTexture2D = rl.LoadRenderTexture(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT)
 	player := Entity{{0, 0}, rl.LoadTexture("textures/player.png")}
@@ -35,8 +38,9 @@ main :: proc() {
 	}
 
 	origin: rl.Vector2 = {f32(0), f32(0)}
-
 	for !rl.WindowShouldClose() {
+		// UPDATE
+
 		// Player controls
 		if rl.IsKeyPressed(.LEFT) {
 			player.position.x -= 1
@@ -48,16 +52,76 @@ main :: proc() {
 			player.position.y += 1
 		}
 
+		// Map Editor
+		mouse_pos := rl.GetScreenToWorld2D(
+			rl.GetMousePosition(),
+			rl.Camera2D{zoom = f32(SCREEN_WIDTH) / f32(VIRTUAL_SCREEN_WIDTH)},
+		)
+
+		if rl.IsMouseButtonPressed(.LEFT) || rl.IsMouseButtonPressed(.RIGHT) {
+			grid_x := i32(mouse_pos.x) / TILE_SIZE
+			grid_y := i32(mouse_pos.y) / TILE_SIZE
+
+			if grid_x >= 0 && grid_x < GRID_WIDTH && grid_y >= 0 && grid_y < GRID_HEIGHT {
+				if rl.IsMouseButtonPressed(.LEFT) {
+					grid[grid_y][grid_x] = 1
+				} else if rl.IsMouseButtonPressed(.RIGHT) {
+					grid[grid_y][grid_x] = 0
+				}
+			}
+		}
+
+		// DRAW
+
 		rl.BeginTextureMode(target)
-		// Draw Player
+		// Draw pixel art 
+
+		// Draw player
 		rl.DrawTextureV(
 			player.sprite,
-			{player.position.x * f32(TILE), player.position.y * f32(TILE)},
+			{player.position.x * f32(TILE_SIZE), player.position.y * f32(TILE_SIZE)},
 			rl.WHITE,
 		)
+
+		// Draw tiles
+		for y in 0 ..< GRID_HEIGHT {
+			for x in 0 ..< GRID_WIDTH {
+				if grid[y][x] != 0 {
+					rl.DrawRectangle(
+						i32(x * TILE_SIZE),
+						i32(y * TILE_SIZE),
+						TILE_SIZE,
+						TILE_SIZE,
+						rl.RED,
+					)
+				}
+			}
+		}
+		// Draw grid lines
+		for y in 0 ..= GRID_HEIGHT {
+			rl.DrawLine(
+				0,
+				i32(y * TILE_SIZE),
+				i32(GRID_HEIGHT * TILE_SIZE),
+				i32(y * TILE_SIZE),
+				rl.WHITE,
+			)
+		}
+		for x in 0 ..= GRID_WIDTH {
+			rl.DrawLine(
+				i32(x * TILE_SIZE),
+				0,
+				i32(x * TILE_SIZE),
+				i32(GRID_WIDTH * TILE_SIZE),
+				rl.WHITE,
+			)
+		}
+
 		rl.ClearBackground(rl.DARKBROWN)
+
 		rl.EndTextureMode()
 
+		// Draw game
 		rl.BeginDrawing()
 
 		rl.DrawTexturePro(target.texture, source_rec, dest_rec, origin, f32(0), rl.WHITE)
