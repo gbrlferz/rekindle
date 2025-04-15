@@ -14,14 +14,14 @@ VIRTUAL_RATIO: f32 : f32(SCREEN_WIDTH / SCREEN_HEIGHT)
 GRID_WIDTH: i32 : 10
 GRID_HEIGHT: i32 : 10
 
+grid: [GRID_WIDTH][GRID_HEIGHT]i32
+
 main :: proc() {
-	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Kindler")
+	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rekindle")
+	player = {{0, 0}, rl.LoadTexture("textures/player.png")}
 	defer rl.CloseWindow()
 
-	grid: [GRID_WIDTH][GRID_HEIGHT]i32
-
 	target: rl.RenderTexture2D = rl.LoadRenderTexture(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT)
-	player := Entity{{0, 0}, rl.LoadTexture("textures/player.png")}
 
 	source_rec: rl.Rectangle = {
 		f32(0),
@@ -40,17 +40,7 @@ main :: proc() {
 	origin: rl.Vector2 = {f32(0), f32(0)}
 	for !rl.WindowShouldClose() {
 		// UPDATE
-
-		// Player controls
-		if rl.IsKeyPressed(.LEFT) {
-			player.position.x -= 1
-		} else if rl.IsKeyPressed(.RIGHT) {
-			player.position.x += 1
-		} else if rl.IsKeyPressed(.UP) {
-			player.position.y -= 1
-		} else if rl.IsKeyPressed(.DOWN) {
-			player.position.y += 1
-		}
+		player_movement()
 
 		// Map Editor
 		mouse_pos := rl.GetScreenToWorld2D(
@@ -71,11 +61,7 @@ main :: proc() {
 			}
 		}
 
-		// DRAW
-
 		rl.BeginTextureMode(target)
-		// Draw pixel art 
-
 		// Draw player
 		rl.DrawTextureV(
 			player.sprite,
@@ -118,10 +104,8 @@ main :: proc() {
 		}
 
 		rl.ClearBackground(rl.DARKBROWN)
-
 		rl.EndTextureMode()
 
-		// Draw game
 		rl.BeginDrawing()
 
 		rl.DrawTexturePro(target.texture, source_rec, dest_rec, origin, f32(0), rl.WHITE)
