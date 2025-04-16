@@ -11,15 +11,16 @@ VIRTUAL_SCREEN_WIDTH: i32 : 320
 VIRTUAL_SCREEN_HEIGHT: i32 : 180
 VIRTUAL_RATIO: f32 : f32(SCREEN_WIDTH / SCREEN_HEIGHT)
 
-GRID_WIDTH: i32 : 10
-GRID_HEIGHT: i32 : 10
-
-grid: [GRID_WIDTH][GRID_HEIGHT]i32
-
 main :: proc() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rekindle")
-	player = {{0, 0}, rl.LoadTexture("textures/player.png")}
 	defer rl.CloseWindow()
+
+	init_player()
+
+	box := Entity {
+		type   = .Box,
+		sprite = rl.LoadTexture("./textures/box.png"),
+	}
 
 	target: rl.RenderTexture2D = rl.LoadRenderTexture(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT)
 
@@ -51,17 +52,21 @@ main :: proc() {
 		if rl.IsMouseButtonPressed(.LEFT) || rl.IsMouseButtonPressed(.RIGHT) {
 			grid_x := i32(mouse_pos.x) / TILE_SIZE
 			grid_y := i32(mouse_pos.y) / TILE_SIZE
-
-			if grid_x >= 0 && grid_x < GRID_WIDTH && grid_y >= 0 && grid_y < GRID_HEIGHT {
-				if rl.IsMouseButtonPressed(.LEFT) {
-					grid[grid_y][grid_x] = 1
-				} else if rl.IsMouseButtonPressed(.RIGHT) {
-					grid[grid_y][grid_x] = 0
+			if rl.IsMouseButtonPressed(.LEFT) {
+				if check_grid(f32(grid_x), f32(grid_y)) {
+					box.position = {f32(grid_x), f32(grid_y)}
+					append(&entities, box)
 				}
 			}
+			// if rl.IsMouseButtonPressed(.RIGHT) {
+			// 	if check_grid(f32(grid_x), f32(grid_y)) {
+			// 		entity := get_entity(f32(grid_x), f32(grid_y))
+			// 	}
+			// }
 		}
 
 		rl.BeginTextureMode(target)
+
 		// Draw player
 		rl.DrawTextureV(
 			player.sprite,
@@ -69,39 +74,15 @@ main :: proc() {
 			rl.WHITE,
 		)
 
-		// Draw tiles
-		for y in 0 ..< GRID_HEIGHT {
-			for x in 0 ..< GRID_WIDTH {
-				if grid[y][x] != 0 {
-					rl.DrawRectangle(
-						i32(x * TILE_SIZE),
-						i32(y * TILE_SIZE),
-						TILE_SIZE,
-						TILE_SIZE,
-						rl.RED,
-					)
-				}
-			}
-		}
-		// Draw grid lines
-		for y in 0 ..= GRID_HEIGHT {
-			rl.DrawLine(
-				0,
-				i32(y * TILE_SIZE),
-				i32(GRID_HEIGHT * TILE_SIZE),
-				i32(y * TILE_SIZE),
+		for entity in entities {
+			rl.DrawTextureV(
+				entity.sprite,
+				{entity.position.x * f32(TILE_SIZE), entity.position.y * f32(TILE_SIZE)},
 				rl.WHITE,
 			)
 		}
-		for x in 0 ..= GRID_WIDTH {
-			rl.DrawLine(
-				i32(x * TILE_SIZE),
-				0,
-				i32(x * TILE_SIZE),
-				i32(GRID_WIDTH * TILE_SIZE),
-				rl.WHITE,
-			)
-		}
+
+		rl.DrawText(rl.TextFormat("Entities: %i", len(entities)), 2, 2, 4, rl.RED)
 
 		rl.ClearBackground(rl.DARKBROWN)
 		rl.EndTextureMode()
