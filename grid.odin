@@ -11,11 +11,11 @@ check_grid :: proc(x: f32, y: f32) -> bool {
 	return true
 }
 
-get_entity :: proc(x: f32, y: f32) -> ^Entity {
-	for &entity in entities {
-		if x == entity.position.x && y == entity.position.y {
-			return &entity
+get_entity_index :: proc(x: f32, y: f32) -> int {
+	for i in 0 ..< len(entities) {
+		if x == entities[i].position.x && y == entities[i].position.y {
+			return i
 		}
 	}
-	return nil
+	return -1
 }

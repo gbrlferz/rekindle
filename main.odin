@@ -49,20 +49,22 @@ main :: proc() {
 			rl.Camera2D{zoom = f32(SCREEN_WIDTH) / f32(VIRTUAL_SCREEN_WIDTH)},
 		)
 
-		if rl.IsMouseButtonPressed(.LEFT) || rl.IsMouseButtonPressed(.RIGHT) {
+		if rl.IsMouseButtonDown(.LEFT) {
 			grid_x := i32(mouse_pos.x) / TILE_SIZE
 			grid_y := i32(mouse_pos.y) / TILE_SIZE
-			if rl.IsMouseButtonPressed(.LEFT) {
-				if check_grid(f32(grid_x), f32(grid_y)) {
-					box.position = {f32(grid_x), f32(grid_y)}
-					append(&entities, box)
-				}
+			if check_grid(f32(grid_x), f32(grid_y)) {
+				box.position = {f32(grid_x), f32(grid_y)}
+				append(&entities, box)
 			}
-			// if rl.IsMouseButtonPressed(.RIGHT) {
-			// 	if check_grid(f32(grid_x), f32(grid_y)) {
-			// 		entity := get_entity(f32(grid_x), f32(grid_y))
-			// 	}
-			// }
+		}
+
+		if rl.IsMouseButtonDown(.RIGHT) {
+			grid_x := i32(mouse_pos.x) / TILE_SIZE
+			grid_y := i32(mouse_pos.y) / TILE_SIZE
+			index := get_entity_index(f32(grid_x), f32(grid_y))
+			if index >= 0 {
+				unordered_remove(&entities, index)
+			}
 		}
 
 		rl.BeginTextureMode(target)
