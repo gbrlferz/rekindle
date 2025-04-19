@@ -10,6 +10,8 @@ init_player :: proc() {
 		position = {0, 0},
 		sprite   = rl.LoadTexture("textures/player.png"),
 	}
+
+	append(&entities, &player)
 }
 
 player_movement :: proc() {
@@ -23,10 +25,7 @@ player_movement :: proc() {
 	} else if rl.IsKeyPressed(.DOWN) {
 		pos.y += 1
 	}
-
-	if check_grid(pos.x, pos.y) {
+	if !check_grid(pos.x, pos.y) {
 		player.position = pos
 	}
-
-	pos = player.position
 }

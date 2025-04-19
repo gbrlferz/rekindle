@@ -22,6 +22,8 @@ main :: proc() {
 		sprite = rl.LoadTexture("./textures/box.png"),
 	}
 
+	append(&entities, &box)
+
 	target: rl.RenderTexture2D = rl.LoadRenderTexture(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT)
 
 	source_rec: rl.Rectangle = {
@@ -39,6 +41,7 @@ main :: proc() {
 	}
 
 	origin: rl.Vector2 = {f32(0), f32(0)}
+
 	for !rl.WindowShouldClose() {
 		// UPDATE
 		player_movement()
@@ -52,9 +55,8 @@ main :: proc() {
 		if rl.IsMouseButtonDown(.LEFT) {
 			grid_x := i32(mouse_pos.x) / TILE_SIZE
 			grid_y := i32(mouse_pos.y) / TILE_SIZE
-			if check_grid(f32(grid_x), f32(grid_y)) {
+			if !check_grid(f32(grid_x), f32(grid_y)) {
 				box.position = {f32(grid_x), f32(grid_y)}
-				append(&entities, box)
 			}
 		}
 
@@ -69,13 +71,7 @@ main :: proc() {
 
 		rl.BeginTextureMode(target)
 
-		// Draw player
-		rl.DrawTextureV(
-			player.sprite,
-			{player.position.x * f32(TILE_SIZE), player.position.y * f32(TILE_SIZE)},
-			rl.WHITE,
-		)
-
+		// Draw entities
 		for entity in entities {
 			rl.DrawTextureV(
 				entity.sprite,
@@ -91,7 +87,7 @@ main :: proc() {
 
 		rl.BeginDrawing()
 
-		rl.DrawTexturePro(target.texture, source_rec, dest_rec, origin, f32(0), rl.WHITE)
+		rl.DrawTexturePro(target.texture, source_rec, dest_rec, origin, 0, rl.WHITE)
 
 		rl.EndDrawing()
 	}

@@ -2,7 +2,7 @@ package game
 
 import rl "vendor:raylib"
 
-entities: [dynamic]Entity
+entities: [dynamic]^Entity
 
 Entity :: struct {
 	type:     Entity_Type,

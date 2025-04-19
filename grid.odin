@@ -5,10 +5,10 @@ import rl "vendor:raylib"
 check_grid :: proc(x: f32, y: f32) -> bool {
 	for entity in entities {
 		if x == entity.position.x && y == entity.position.y {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 get_entity_index :: proc(x: f32, y: f32) -> int {
